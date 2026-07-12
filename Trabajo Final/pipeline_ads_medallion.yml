@@ -1,0 +1,57 @@
+resources:
+  jobs:
+    pipeline_ads_medallion:
+      name: pipeline_ads_medallion
+      trigger:
+        pause_status: UNPAUSED
+        periodic:
+          interval: 1
+          unit: DAYS
+      tasks:
+        - task_key: 01_configuracion_unity_catalog
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/01_configuracion_unity_catalog
+            source: WORKSPACE
+          environment_key: Default
+        - task_key: 03_carga_bronze
+          depends_on:
+            - task_key: 01_configuracion_unity_catalog
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/03_orquestador_carga_bronze
+            source: WORKSPACE
+          environment_key: Default
+        - task_key: 04_configuracion_silver_gold
+          depends_on:
+            - task_key: 03_carga_bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/04_configuracion_silver_gold
+            source: WORKSPACE
+          environment_key: Default
+        - task_key: 06_carga_silver
+          depends_on:
+            - task_key: 04_configuracion_silver_gold
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/06_orquestador_carga_silver
+            source: WORKSPACE
+          environment_key: Default
+        - task_key: 07_gold_rendimiento_campanas
+          depends_on:
+            - task_key: 06_carga_silver
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/07_gold_performance_campanas
+            source: WORKSPACE
+          environment_key: Default
+        - task_key: 08_gold_ingresos_anunciantes
+          depends_on:
+            - task_key: 06_carga_silver
+          notebook_task:
+            notebook_path: /Workspace/Users/yorluis64@gmail.com/Trabajo Final/08_gold_revenue_anunciantes
+            source: WORKSPACE
+          environment_key: Default
+      queue:
+        enabled: true
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "5"
+      performance_target: PERFORMANCE_OPTIMIZED
